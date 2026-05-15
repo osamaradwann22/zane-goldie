@@ -3,7 +3,7 @@ class MenuScene extends Phaser.Scene {
     constructor() { super({ key: 'MenuScene' }); }
 
     preload() {
-        this.load.image('background_city',    'assets/images/background_city.png');
+        this.load.image('sky_background',     'assets/images/sky_background.png');
         this.load.image('goldie1',            'assets/images/goldie1.png');
         this.load.image('goldie2',            'assets/images/goldie2.png');
         this.load.image('goldie3',            'assets/images/goldie3.png');
@@ -14,8 +14,8 @@ class MenuScene extends Phaser.Scene {
 
     create() {
         // ── BACKGROUND ───────────────────────────
-        this.add.image(240, 427, 'background_city').setDisplaySize(480, 854);
-
+        this.add.image(240, 427, 'sky_background').setDisplaySize(480, 854);
+        
         // ── DARK OVERLAY ─────────────────────────
         this.add.rectangle(240, 427, 480, 854, 0x000000, 0.45);
 
@@ -45,7 +45,7 @@ class MenuScene extends Phaser.Scene {
             fontSize: '18px', fill: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.text(240, 463, '👆  Tap to Jump over obstacles', {
+        this.add.text(240, 463, '👆  Swipe Up to Jump over obstacles', {
             fontSize: '16px', fill: '#ffffff', fontFamily: 'Arial'
         }).setOrigin(0.5);
 
@@ -66,7 +66,6 @@ class MenuScene extends Phaser.Scene {
             fontSize: '24px', fill: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // Button pulse animation
         this.tweens.add({
             targets: btn, scaleX: 1.05, scaleY: 1.05,
             duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
@@ -87,16 +86,11 @@ class MenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // ── START ON TAP ANYWHERE ────────────────
-        this.input.on('pointerdown', () => {
-            this.scene.start('GameScene');
-        });
-        this.input.keyboard.on('keydown-SPACE', () => {
-            this.scene.start('GameScene');
-        });
+        this.input.on('pointerdown', () => { this.scene.start('GameScene'); });
+        this.input.keyboard.on('keydown-SPACE', () => { this.scene.start('GameScene'); });
     }
 
     update(time, delta) {
-        // Animate Goldie in menu
         this.goldieTimer += delta;
         if (this.goldieTimer > 150) {
             this.goldieTimer = 0;
@@ -110,7 +104,6 @@ class MenuScene extends Phaser.Scene {
 class GameScene extends Phaser.Scene {
     constructor() { super({ key: 'GameScene' }); }
 }
-
 
 // ── GAME STATE ────────────────────────────────────
 let zane;
@@ -130,7 +123,6 @@ let spawnTimer = 0;
 let spawnDelay = 2000;
 let happyMealTimer = 0;
 let happyMealDelay = 4000;
-let currentWorld = 'city';
 let timeLeft = 300;
 
 // ── ZANE STATE MACHINE ────────────────────────────
@@ -151,49 +143,134 @@ const GOLDIE_FRAME_DELAY = 150;
 const GROUND_Y = 810;
 const ZANE_SCALE = 0.20;
 const ZANE_Y = 740;
-const FALCON_Y = 680;
+const FALCON_Y = 665;
 
-const cityObstacles   = ['car', 'cart', 'coffee'];
-const desertObstacles = ['camel', 'coffee'];
-
+const cityObstacles = ['car', 'cart', 'coffee'];
 const OBS_H = { car: 415, cart: 797, coffee: 845, camel: 883, falcon: 734 };
 
 GameScene.prototype.preload = function() {
-    this.load.image('background_city',       'assets/images/background_city.png');
-    this.load.image('background_transition', 'assets/images/background_transition.png');
-    this.load.image('background_desert',     'assets/images/background_desert.png');
-    this.load.image('street',    'assets/images/street.png');
-    this.load.image('zane_run1', 'assets/images/zane_run1.png');
-    this.load.image('zane_run2', 'assets/images/zane_run2.png');
-    this.load.image('zane_run3', 'assets/images/zane_run3.png');
-    this.load.image('zane_run4', 'assets/images/zane_run4.png');
-    this.load.image('zane_jump', 'assets/images/zane_jump.png');
-    this.load.image('zane_duck', 'assets/images/zane_duck.png');
-    this.load.image('zane_hit',  'assets/images/zane_hit.png');
-    this.load.image('car',       'assets/images/car.png');
-    this.load.image('cart',      'assets/images/cart.png');
-    this.load.image('coffee',    'assets/images/coffee.png');
-    this.load.image('camel',     'assets/images/camel.png');
-    this.load.image('falcon',    'assets/images/falcon.png');
-    this.load.image('happymeal', 'assets/images/happymeal.png');
-    this.load.image('heart',     'assets/images/heart.png');
-    // ── GOLDIE 4 FRAMES ──────────────────────────
-    this.load.image('goldie1',   'assets/images/goldie1.png');
-    this.load.image('logo_mcdonalds', 'assets/images/logo_mcdonalds.png');
-    this.load.image('logo_tmk',       'assets/images/logo_tmk.png');
-    this.load.image('goldie2',   'assets/images/goldie2.png');
-    this.load.image('goldie3',   'assets/images/goldie3.png');
-    this.load.image('goldie4',   'assets/images/goldie4.png');
+    this.load.image('sky_background',    'assets/images/sky_background.png');
+    this.load.image('street',            'assets/images/street.png');
+    this.load.image('zane_run1',         'assets/images/zane_run1.png');
+    this.load.image('zane_run2',         'assets/images/zane_run2.png');
+    this.load.image('zane_run3',         'assets/images/zane_run3.png');
+    this.load.image('zane_run4',         'assets/images/zane_run4.png');
+    this.load.image('zane_jump',         'assets/images/zane_jump.png');
+    this.load.image('zane_duck',         'assets/images/zane_duck.png');
+    this.load.image('zane_hit',          'assets/images/zane_hit.png');
+    this.load.image('car',               'assets/images/car.png');
+    this.load.image('cart',              'assets/images/cart.png');
+    this.load.image('coffee',            'assets/images/coffee.png');
+    this.load.image('camel',             'assets/images/camel.png');
+    this.load.image('falcon',            'assets/images/falcon.png');
+    this.load.image('happymeal',         'assets/images/happymeal.png');
+    this.load.image('heart',             'assets/images/heart.png');
+    this.load.image('goldie1',           'assets/images/goldie1.png');
+    this.load.image('goldie2',           'assets/images/goldie2.png');
+    this.load.image('goldie3',           'assets/images/goldie3.png');
+    this.load.image('goldie4',           'assets/images/goldie4.png');
+    this.load.image('logo_mcdonalds',    'assets/images/logo_mcdonalds.png');
+    this.load.image('logo_tmk',         'assets/images/logo_tmk.png');
+    this.load.image('balloon_happymeal', 'assets/images/balloon_happymeal.png');
+    this.load.image('balloon_fries',     'assets/images/balloon_fries.png');
+    this.load.image('balloon_m',         'assets/images/balloon_m.png');
 }
 
 GameScene.prototype.create = function() {
 
-    // ── BACKGROUNDS ──────────────────────────────
-    this.bgCity1 = this.add.image(240, 380, 'background_city').setDisplaySize(700, 854).setDepth(0);
-    this.bgCity2 = this.add.image(939, 380, 'background_city').setDisplaySize(700, 854).setDepth(0).setFlipX(true);
-    this.bgTransition = this.add.image(240, 427, 'background_transition').setDisplaySize(480, 854).setDepth(1).setAlpha(0);
-    this.bgDesert1 = this.add.image(240, 427, 'background_desert').setDisplaySize(480, 854).setDepth(1).setAlpha(0);
-    this.bgDesert2 = this.add.image(720, 427, 'background_desert').setDisplaySize(480, 854).setDepth(1).setAlpha(0).setFlipX(true);
+    // ── RESET ALL VARIABLES ON RESTART ───────────
+    lives = 3;
+    goldieDistance = 1000;
+    isGameOver = false;
+    isInvincible = false;
+    gameSpeed = 250;
+    spawnTimer = 0;
+    spawnDelay = 2000;
+    happyMealTimer = 0;
+    happyMealDelay = 4000;
+    timeLeft = 300;
+    zaneState = 'run';
+    runFrame = 1;
+    runTimer = 0;
+    goldieFrame = 1;
+    goldieTimer = 0;
+    lastObstacleHadMeals = false;
+
+    // ── LAYER 1: SKY BACKGROUND ──────────────────
+    // Two copies scrolling slowly — edges are plain sky so seamless
+    this.bgCity1 = this.add.image(240, 385, 'sky_background').setDisplaySize(700, 854).setDepth(0);
+    this.bgCity2 = this.add.image(939, 385, 'sky_background').setDisplaySize(700, 854).setDepth(0);
+
+    // ── LAYER 2: ATMOSPHERE OVERLAYS ─────────────
+    // Colored rectangles fading in/out over 5 minutes
+    this.warmGlow   = this.add.rectangle(240, 427, 480, 854, 0xFFAA00, 0).setDepth(1);
+    this.sunsetGlow = this.add.rectangle(240, 427, 480, 854, 0xFF4400, 0).setDepth(1);
+    this.neonGlow   = this.add.rectangle(240, 427, 480, 854, 0x220066, 0).setDepth(1);
+
+    // ── LAYER 4: SPARKLE PARTICLES ───────────────
+    this.sparkles = [];
+    for (let i = 0; i < 15; i++) {
+        let spark = this.add.text(
+            Phaser.Math.Between(20, 460),
+            Phaser.Math.Between(100, 750),
+            '✦',
+            { fontSize: Phaser.Math.Between(8, 18) + 'px', fill: '#FFD700' }
+        ).setAlpha(Phaser.Math.FloatBetween(0.1, 0.6)).setDepth(2);
+
+        this.tweens.add({
+            targets: spark,
+            y: spark.y - Phaser.Math.Between(80, 200),
+            alpha: 0,
+            duration: Phaser.Math.Between(2000, 4000),
+            delay: Phaser.Math.Between(0, 3000),
+            repeat: -1,
+            repeatDelay: Phaser.Math.Between(1000, 3000),
+            onRepeat: () => {
+                spark.x = Phaser.Math.Between(20, 460);
+                spark.y = Phaser.Math.Between(500, 800);
+                spark.setAlpha(Phaser.Math.FloatBetween(0.3, 0.8));
+            }
+        });
+        this.sparkles.push(spark);
+    }
+
+    // ── LAYER 5: FLOATING BALLOONS ───────────────
+    const balloonTypes = ['balloon_happymeal', 'balloon_fries', 'balloon_m'];
+    this.balloons = [];
+    balloonTypes.forEach((type, i) => {
+        let balloon = this.add.image(
+            Phaser.Math.Between(50, 430),
+            Phaser.Math.Between(150, 500),
+            type
+        ).setScale(0.25 + i * 0.05).setAlpha(0.7).setDepth(2);
+
+        this.tweens.add({
+            targets: balloon,
+            x: balloon.x + Phaser.Math.Between(300, 500),
+            y: balloon.y - Phaser.Math.Between(50, 150),
+            alpha: 0,
+            duration: Phaser.Math.Between(12000, 20000),
+            delay: i * 4000,
+            repeat: -1,
+            onRepeat: () => {
+                balloon.x = Phaser.Math.Between(-50, -10);
+                balloon.y = Phaser.Math.Between(200, 600);
+                balloon.setAlpha(0.7);
+            }
+        });
+        this.balloons.push(balloon);
+    });
+
+    // ── LAYER 6: CITY GLOW ───────────────────────
+    this.cityGlow = this.add.rectangle(240, 720, 480, 200, 0xFFAA00, 0.08).setDepth(1);
+    this.tweens.add({
+        targets: this.cityGlow,
+        alpha: 0.15,
+        duration: 2000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+    });
 
     // ── STREET ───────────────────────────────────
     this.street1 = this.add.image(240,  820, 'street').setDisplaySize(480, 60).setDepth(2);
@@ -212,13 +289,8 @@ GameScene.prototype.create = function() {
     groundPlatform.setDepth(3);
 
     // ── GOLDIE ───────────────────────────────────
-    // Goldie runs ahead of Zane on the street, same ground level
-    // goldie images: 1024x1024, scale 0.10 → display ~102px
-    // Center Y = GROUND_Y - (1024 * 0.10 / 2) = 810 - 51 = 759
     goldieSprite = this.add.image(380, 759, 'goldie1')
-        .setScale(0.10)
-        .setDepth(4)
-        .setFlipX(false); // facing left = running away from Zane
+        .setScale(0.10).setDepth(4).setFlipX(false);
 
     // ── ZANE ─────────────────────────────────────
     zane = this.physics.add.sprite(80, ZANE_Y, 'zane_run1');
@@ -256,17 +328,14 @@ GameScene.prototype.create = function() {
     }).setDepth(10);
 
     // ── INPUT ────────────────────────────────────
-    // ── KEYBOARD CONTROLS ────────────────────────
     this.input.keyboard.on('keydown-SPACE', () => { jumpZane(); });
     this.input.keyboard.on('keydown-UP',    () => { jumpZane(); });
     this.input.keyboard.on('keydown-DOWN',  () => { startDuck(); });
     this.input.keyboard.on('keyup-DOWN',    () => { stopDuck(); });
 
-    // ── MOBILE TOUCH CONTROLS ─────────────────────
-    // Track touch start position to detect swipe direction
     let touchStartY = 0;
     let touchStartTime = 0;
-    const SWIPE_THRESHOLD = 30; // px — minimum swipe distance
+    const SWIPE_THRESHOLD = 30;
 
     this.input.on('pointerdown', (ptr) => {
         touchStartY = ptr.y;
@@ -276,15 +345,13 @@ GameScene.prototype.create = function() {
     this.input.on('pointerup', (ptr) => {
         const swipeDistance = ptr.y - touchStartY;
         const swipeTime = Date.now() - touchStartTime;
-
-        if (swipeDistance > SWIPE_THRESHOLD && swipeTime < 300) {
-            // ── SWIPE DOWN → DUCK ─────────────────
-            startDuck();
-            // Auto stand after 600ms (simulate keyup)
-            setTimeout(() => { stopDuck(); }, 600);
-        } else if (Math.abs(swipeDistance) < SWIPE_THRESHOLD) {
-            // ── TAP → JUMP ────────────────────────
-            jumpZane();
+        if (swipeTime < 300) {
+            if (swipeDistance < -SWIPE_THRESHOLD) {
+                jumpZane();
+            } else if (swipeDistance > SWIPE_THRESHOLD) {
+                startDuck();
+                setTimeout(() => { stopDuck(); }, 600);
+            }
         }
     });
 }
@@ -293,7 +360,7 @@ GameScene.prototype.create = function() {
 function jumpZane() {
     if (isGameOver) return;
     if (zaneState === 'run') {
-        zane.body.setVelocityY(-800);
+        zane.body.setVelocityY(-720);
         zaneState = 'jump';
         zane.setTexture('zane_jump');
     }
@@ -329,16 +396,11 @@ function spawnObstacle(scene) {
         obsScale = 0.10;
         spawnY = FALCON_Y;
     } else {
-        key = (currentWorld === 'city' || currentWorld === 'transition')
-            ? cityObstacles[Phaser.Math.Between(0, cityObstacles.length - 1)]
-            : desertObstacles[Phaser.Math.Between(0, desertObstacles.length - 1)];
-
+        key = cityObstacles[Phaser.Math.Between(0, cityObstacles.length - 1)];
         if      (key === 'car')    obsScale = 0.14;
         else if (key === 'cart')   obsScale = 0.10;
         else if (key === 'coffee') obsScale = 0.08;
-        else if (key === 'camel')  obsScale = 0.10;
         else                       obsScale = 0.10;
-
         const h = OBS_H[key] || 800;
         spawnY = GROUND_Y - (h * obsScale / 2);
     }
@@ -358,16 +420,13 @@ function spawnObstacle(scene) {
 
     let hasHit = false;
     scene.physics.add.overlap(zane, obs, () => {
-        if (!hasHit) { hasHit = true; hitObstacle(scene); }
+        if (!hasHit) { hasHit = true; hitObstacle(scene, key); }
     });
 
-    // ── HAPPY MEALS — cooldown rule + 40% random chance ─
-    // Never two consecutive obstacles with happy meals
+    // ── HAPPY MEALS — cooldown + 40% chance ──────
     if (lastObstacleHadMeals) {
-        // Last obstacle had meals — force skip this one
         lastObstacleHadMeals = false;
     } else if (Phaser.Math.Between(1, 100) <= 40) {
-        // 40% chance — spawn happy meals
         lastObstacleHadMeals = true;
         if (key === 'falcon') {
             spawnHappyMeals(scene, 'straight', 520);
@@ -380,42 +439,30 @@ function spawnObstacle(scene) {
 }
 
 // ── SPAWN HAPPY MEALS ────────────────────────────
-// type: 'straight' = ground line under falcon (3 centered)
-//       'arc'      = 3 box arc over ground obstacle
-// obsX: x position of the obstacle
 function spawnHappyMeals(scene, type, obsX) {
     const HM_SCALE = 0.07;
     const groundY = GROUND_Y - (769 * HM_SCALE / 2);
     let positions = [];
 
     if (type === 'straight') {
-        // ── FALCON: 3 boxes centered under falcon ─
-        // Start just before falcon, end just after
         const spacing = 60;
         positions = [
-            { x: obsX - spacing, y: groundY }, // just before falcon
-            { x: obsX,           y: groundY }, // under falcon center
-            { x: obsX + spacing, y: groundY }, // just after falcon
+            { x: obsX - spacing, y: groundY, airMeal: false },
+            { x: obsX,           y: groundY, airMeal: false },
+            { x: obsX + spacing, y: groundY, airMeal: false },
         ];
-
     } else if (type === 'arc') {
-        // ── GROUND OBSTACLE: 5 box symmetrical arc ─
-        // Middle box centered above obstacle
-        // 2 rising before, 2 falling after
-        const peakY   = 665;  // top — above obstacle
-        const midY    = 700;  // mid height
-        const lowY    = 740;  // low — near ground
-        const spacing = 80;   // horizontal spacing
+        const peakY = 665, midY = 700, lowY = 740, spacing = 80;
         positions = [
-            { x: obsX - spacing * 2, y: lowY  }, // far left  — "start jump!"
-            { x: obsX - spacing * 1, y: midY  }, // rising
-            { x: obsX,               y: peakY }, // CENTER — above obstacle
-            { x: obsX + spacing * 1, y: midY  }, // falling
-            { x: obsX + spacing * 2, y: lowY  }, // far right — "land here!"
+            { x: obsX - spacing * 2, y: lowY,  airMeal: false },
+            { x: obsX - spacing * 1, y: midY,  airMeal: true  },
+            { x: obsX,               y: peakY, airMeal: true  },
+            { x: obsX + spacing * 1, y: midY,  airMeal: true  },
+            { x: obsX + spacing * 2, y: lowY,  airMeal: false },
         ];
     }
 
-    positions.forEach(({ x, y }) => {
+    positions.forEach(({ x, y, airMeal }) => {
         if (isGameOver) return;
         let hm = scene.physics.add.sprite(x, y, 'happymeal');
         hm.setScale(HM_SCALE);
@@ -427,7 +474,11 @@ function spawnHappyMeals(scene, type, obsX) {
 
         let collected = false;
         scene.physics.add.overlap(zane, hm, () => {
-            if (!collected) { collected = true; collectHappyMeal(scene, hm); }
+            if (!collected) {
+                if (airMeal && zaneState !== 'jump') return;
+                collected = true;
+                collectHappyMeal(scene, hm);
+            }
         });
     });
 }
@@ -447,9 +498,9 @@ function collectHappyMeal(scene, hm) {
 }
 
 // ── HIT OBSTACLE ─────────────────────────────────
-function hitObstacle(scene) {
+function hitObstacle(scene, obstacleKey) {
     if (isGameOver || isInvincible) return;
-    if (zaneState === 'duck') return;
+    if (zaneState === 'duck' && obstacleKey === 'falcon') return;
 
     lives--;
     if (heartImages[lives]) heartImages[lives].setAlpha(0.15);
@@ -508,49 +559,38 @@ GameScene.prototype.update = function(time, delta) {
     timerText.setText(mins + ':' + (secs < 10 ? '0' : '') + secs);
     if (timeLeft <= 30) timerText.setStyle({ fill: '#FF0000', fontSize: '28px', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000000', strokeThickness: 4 });
 
-    // ── WORLD CYCLE (loops every 100s across 5 minutes) ──
-    // 0-40s  → City        (obstacles ON)
-    // 40-50s → Transition  (obstacles OFF - player break)
-    // 50-90s → Desert      (obstacles ON)
-    // 90-100s→ Reversed transition back to City (obstacles OFF)
+    // ── LAYER 1: SKY SCROLL ──────────────────────
+    this.bgCity1.x -= 0.3;
+    this.bgCity2.x -= 0.3;
+    if (this.bgCity1.x < -350) this.bgCity1.x = this.bgCity2.x + 699;
+    if (this.bgCity2.x < -350) this.bgCity2.x = this.bgCity1.x + 699;
+
+    // ── LAYER 2: ATMOSPHERE OVERLAYS ─────────────
+    // Day → Golden hour → Sunset → Neon night over 5 minutes
     const elapsed = 300 - timeLeft;
-    const cyclePos = elapsed % 100;
-    let inTransition = false;
-
-    if (cyclePos < 40) {
-        // ── CITY ─────────────────────────────────
-        currentWorld = 'city';
-        this.bgCity1.setAlpha(1); this.bgCity2.setAlpha(1);
-        this.bgTransition.setAlpha(0);
-        this.bgDesert1.setAlpha(0); this.bgDesert2.setAlpha(0);
-        this.bgCity1.x -= 0.5; this.bgCity2.x -= 0.5;
-        if (this.bgCity1.x < -350) this.bgCity1.x = this.bgCity2.x + 699;
-        if (this.bgCity2.x < -350) this.bgCity2.x = this.bgCity1.x + 699;
-
-    } else if (cyclePos < 50) {
-        // ── CITY → TRANSITION ────────────────────
-        currentWorld = 'transition';
-        inTransition = true;
-        const p = (cyclePos - 40) / 10;
-        this.bgCity1.setAlpha(1-p); this.bgCity2.setAlpha(1-p);
-        this.bgTransition.setAlpha(p);
-        this.bgDesert1.setAlpha(0); this.bgDesert2.setAlpha(0);
-
-    } else if (cyclePos < 90) {
-        // ── DESERT ───────────────────────────────
-        currentWorld = 'desert';
-        this.bgCity1.setAlpha(0); this.bgCity2.setAlpha(0);
-        this.bgTransition.setAlpha(0);
-        this.bgDesert1.setAlpha(1); this.bgDesert2.setAlpha(1);
-
+    if (elapsed < 100) {
+        this.warmGlow.setAlpha(0);
+        this.sunsetGlow.setAlpha(0);
+        this.neonGlow.setAlpha(0);
+    } else if (elapsed < 150) {
+        const p = (elapsed - 100) / 50;
+        this.warmGlow.setAlpha(p * 0.25);
+        this.sunsetGlow.setAlpha(0);
+        this.neonGlow.setAlpha(0);
+    } else if (elapsed < 200) {
+        this.warmGlow.setAlpha(0.25);
+        this.sunsetGlow.setAlpha(0);
+        this.neonGlow.setAlpha(0);
+    } else if (elapsed < 250) {
+        const p = (elapsed - 200) / 50;
+        this.warmGlow.setAlpha(0.25 * (1-p));
+        this.sunsetGlow.setAlpha(p * 0.20);
+        this.neonGlow.setAlpha(0);
     } else {
-        // ── DESERT → TRANSITION → CITY (reversed) ─
-        currentWorld = 'transition';
-        inTransition = true;
-        const p = (cyclePos - 90) / 10;
-        this.bgDesert1.setAlpha(1-p); this.bgDesert2.setAlpha(1-p);
-        this.bgTransition.setAlpha(1 - Math.abs(p - 0.5) * 2);
-        this.bgCity1.setAlpha(p); this.bgCity2.setAlpha(p);
+        const p = Math.min(1, (elapsed - 250) / 50);
+        this.warmGlow.setAlpha(0);
+        this.sunsetGlow.setAlpha(0.20 * (1-p));
+        this.neonGlow.setAlpha(p * 0.35);
     }
 
     // ── STREET SCROLL ────────────────────────────
@@ -580,16 +620,11 @@ GameScene.prototype.update = function(time, delta) {
     const progress = (300 - timeLeft) / 300;
     goldieDistance = Math.max(50, Math.floor(1000 - progress * 950));
     goldieText.setText('Goldie: ' + goldieDistance + 'm 🪙');
-
-    // Goldie gets closer (moves left toward Zane) as distance decreases
-    // Starts at X=420, gets as close as X=280 (just ahead of Zane at X=80)
     const gProgress = 1 - (goldieDistance - 50) / 950;
     const goldieX = 420 - gProgress * 140;
-    const goldieScale = 0.08 + gProgress * 0.06; // grows as it gets closer
+    const goldieScale = 0.08 + gProgress * 0.06;
     goldieSprite.setPosition(goldieX, 759);
     goldieSprite.setScale(goldieScale);
-
-    // Cycle Goldie run frames
     goldieTimer += delta;
     if (goldieTimer >= GOLDIE_FRAME_DELAY) {
         goldieTimer = 0;
@@ -598,40 +633,26 @@ GameScene.prototype.update = function(time, delta) {
     }
 
     // ── SPAWN ─────────────────────────────────────
-    // No obstacles during transition — player gets a break
-    if (!inTransition) {
-        spawnTimer += delta;
-        if (spawnTimer > spawnDelay) {
-            spawnObstacle(this);
-            spawnTimer = 0;
-            gameSpeed += 5;
-            spawnDelay = Math.max(900, spawnDelay - 40);
-        }
-    } else {
-        spawnTimer = 0; // reset so no burst after transition
-
-        // ── TRANSITION: 50% chance straight line every 3s ──
-        happyMealTimer += delta;
-        if (happyMealTimer > 3000) {
-            happyMealTimer = 0;
-            if (Phaser.Math.Between(1, 100) <= 50) {
-                spawnHappyMeals(this, 'straight', 520);
-            }
-        }
+    spawnTimer += delta;
+    if (spawnTimer > spawnDelay) {
+        spawnObstacle(this);
+        spawnTimer = 0;
+        gameSpeed = Math.min(450, gameSpeed + 3);
+        const spawnFloor = timeLeft < 90 ? 1000 : 1500;
+        spawnDelay = Math.max(spawnFloor, spawnDelay - 30);
     }
-
-    // Happy meals now spawn with obstacles
 
     // ── CLEANUP ───────────────────────────────────
     obstacles.getChildren().forEach(obs => { if (obs.x < -150) obs.destroy(); });
     happyMeals.getChildren().forEach(hm  => { if (hm.x  < -150) hm.destroy(); });
 }
-// ── CONFIG & BOOT (must be after all scene classes) ──
+
+// ── CONFIG & BOOT ────────────────────────────────
 const config = {
     type: Phaser.AUTO,
     width: 480,
     height: 854,
-    backgroundColor: '#87CEEB',
+    backgroundColor: '#1a1a2e',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
