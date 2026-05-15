@@ -199,7 +199,7 @@ GameScene.prototype.create = function() {
     // ── LAYER 1: SKY BACKGROUND ──────────────────
     // Two copies scrolling slowly — edges are plain sky so seamless
     this.bgCity1 = this.add.image(240, 385, 'sky_background').setDisplaySize(700, 854).setDepth(0);
-    this.bgCity2 = this.add.image(939, 385, 'sky_background').setDisplaySize(700, 854).setDepth(0)setFlipX(true);
+    this.bgCity2 = this.add.image(939, 385, 'sky_background').setDisplaySize(700, 854).setDepth(0).setFlipX(true);
 
     // ── LAYER 2: ATMOSPHERE OVERLAYS ─────────────
     // Colored rectangles fading in/out over 5 minutes
