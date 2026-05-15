@@ -562,8 +562,8 @@ GameScene.prototype.update = function(time, delta) {
     // ── LAYER 1: SKY SCROLL ──────────────────────
     this.bgCity1.x -= 0.3;
     this.bgCity2.x -= 0.3;
-    if (this.bgCity1.x < -350) this.bgCity1.x = this.bgCity2.x + 699;
-    if (this.bgCity2.x < -350) this.bgCity2.x = this.bgCity1.x + 699;
+    if (this.bgCity1.x < -250) this.bgCity1.x = this.bgCity2.x + 499;
+    if (this.bgCity2.x < -250) this.bgCity2.x = this.bgCity1.x + 499;
 
     // ── LAYER 2: ATMOSPHERE OVERLAYS ─────────────
     // Day → Golden hour → Sunset → Neon night over 5 minutes
